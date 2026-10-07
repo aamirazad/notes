@@ -889,19 +889,30 @@
         const y2 = Y * Math.cos(pitch) - z1 * Math.sin(pitch)
         return [x1, y2]
       }
-      // fit
-      const radius = Math.max(...sample(f, xmin, xmax, 100).map(([, y]) => Math.abs(y)).filter(Number.isFinite))
       const L = xmax - xmin
-      const extent = Math.max(L, radius * 2) * 0.62
-      const cx = (xmin + xmax) / 2
-      const k = Math.min((W - 30) / (extent * 2.1), (H - 30) / (extent * 1.5))
-      const toS = ([a, b]) => [W / 2 + (a - (cx * Math.cos(yaw))) * k, H / 2 - b * k]
-      const P = (x, r, th) => {
-        // axis x: radius r spins in the y-z plane; axis y: swap roles
-        return axis === "x"
-          ? toS(proj(x, r * Math.cos(th), r * Math.sin(th)))
-          : toS(proj(r * Math.cos(th), x, r * Math.sin(th)))
+      const raw = (x, r, th) =>
+        axis === "x" ? proj(x, r * Math.cos(th), r * Math.sin(th)) : proj(r * Math.cos(th), x, r * Math.sin(th))
+      // fit the whole solid (and a bit of the axis) inside the canvas
+      let lo = [Infinity, Infinity]
+      let hi = [-Infinity, -Infinity]
+      const grow = ([a, b]) => {
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return
+        lo = [Math.min(lo[0], a), Math.min(lo[1], b)]
+        hi = [Math.max(hi[0], a), Math.max(hi[1], b)]
       }
+      for (let i = 0; i <= 30; i++) {
+        const x = xmin + (L * i) / 30
+        const r = f(env({ x }))
+        for (let j = 0; j < 24; j++) grow(raw(x, r, (Math.PI * 2 * j) / 24))
+      }
+      grow(raw(xmin - L * 0.12, 0, 0))
+      grow(raw(xmax + L * 0.12, 0, 0))
+      const pad = 18
+      const k = Math.min((W - 2 * pad) / (hi[0] - lo[0] || 1), (H - 2 * pad - 24) / (hi[1] - lo[1] || 1))
+      const ox = W / 2 - ((lo[0] + hi[0]) / 2) * k
+      const oy = H / 2 + 10 + ((lo[1] + hi[1]) / 2) * k
+      const toS = ([a, b]) => [ox + a * k, oy - b * k]
+      const P = (x, r, th) => toS(raw(x, r, th))
       const maxTh = Math.PI * 2 * progress
       ctx.save()
       ctx.lineJoin = "round"
@@ -984,7 +995,7 @@
         ctx.fillText(String(err.message), 12, 24)
       }
     }
-    if (kind === "revolve") progress = cfg.start ?? 0.3
+    if (kind === "revolve") progress = cfg.start ?? 1
     new ResizeObserver(() => resize()).observe(frame)
     const theme = new MutationObserver(paintNow)
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["saved-theme"] })
