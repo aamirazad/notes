@@ -46,6 +46,7 @@ body {
   // center column: text measure, plus room for the explanation margin on wide screens
   & .center > .page-header,
   & .center > article,
+  & .center > .popover-hint,
   & .center > .page-footer,
   & .center > hr {
     max-width: var(--text-measure);
@@ -60,6 +61,7 @@ body {
     }
     & .center > .page-header,
     & .center > article,
+    & .center > .popover-hint,
     & .center > .page-footer,
     & .center > hr {
       max-width: var(--col);

@@ -7,8 +7,8 @@ const css = `
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 1rem;
 }
-.class-card {
-  display: flex;
+.class-index a.class-card {
+  text-decoration: none;
   flex-direction: column;
   gap: 0.35rem;
   padding: 1.1rem 1.2rem 1rem;
@@ -18,8 +18,9 @@ const css = `
   color: var(--darkgray) !important;
   text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
 }
-.class-card:hover {
+.class-index a.class-card:hover {
   border-color: var(--secondary);
   transform: translateY(-2px);
   box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.35);
