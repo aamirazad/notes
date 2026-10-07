@@ -138,8 +138,12 @@ const script = `
 
 export const FloatingToc = () => {
   const Component = ({ fileData }) => {
-    const toc = fileData?.toc
-    if (!toc || toc.length < 2) return null
+    // the note's own "# Title" duplicates the page title, so leave it out
+    const title = fileData?.frontmatter?.title
+    const entries = (fileData?.toc ?? []).filter((t) => !(t.depth === 0 && t.text === title))
+    if (entries.length < 2) return null
+    const base = Math.min(...entries.map((t) => t.depth))
+    const toc = entries.map((t) => ({ ...t, depth: t.depth - base }))
     return h("nav", { class: "ftoc", "aria-label": "Table of contents" }, [
       h(
         "div",
