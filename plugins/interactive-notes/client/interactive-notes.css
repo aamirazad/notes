@@ -14,7 +14,7 @@
   --xp-bad-soft: rgba(181, 72, 61, 0.1);
   --xp-new: #b3541e;
   --xp-new-bg: rgba(240, 160, 80, 0.2);
-  --xp-curve: #2f6690;
+  --xp-curve: #8a6a45;
   --xp-radius: 10px;
 }
 :root[saved-theme="dark"] {
@@ -28,7 +28,7 @@
   --xp-bad-soft: rgba(236, 138, 128, 0.12);
   --xp-new: #ffb37a;
   --xp-new-bg: rgba(255, 179, 122, 0.16);
-  --xp-curve: #8ab8dc;
+  --xp-curve: #e8d9bc;
 }
 
 /* ---------------------------------------------------------- anchors */

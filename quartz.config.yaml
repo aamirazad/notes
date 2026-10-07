@@ -27,9 +27,9 @@ configuration:
         gray: "#8d877c"
         darkgray: "#3a3833"
         dark: "#1f1e1b"
-        secondary: "#2f6690"
+        secondary: "#8a6a45"
         tertiary: "#c2702a"
-        highlight: rgba(47, 102, 144, 0.08)
+        highlight: rgba(138, 106, 69, 0.08)
         textHighlight: "#ffe08a88"
       darkMode:
         light: "#191816"
@@ -37,9 +37,9 @@ configuration:
         gray: "#837d72"
         darkgray: "#d8d3c9"
         dark: "#efebe3"
-        secondary: "#8ab8dc"
+        secondary: "#e8d9bc"
         tertiary: "#f0a868"
-        highlight: rgba(138, 184, 220, 0.1)
+        highlight: rgba(232, 217, 188, 0.08)
         textHighlight: "#b38f2a66"
 plugins:
   - source: "@quartz-community/created-modified-date"
@@ -246,7 +246,9 @@ plugins:
   - source: "@quartz-community/footer"
     enabled: true
     options:
-      links: {}
+      links: {
+        CC BY-SA 4.0: "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
     layout:
       position: footer
       priority: 50
