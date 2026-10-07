@@ -4,8 +4,7 @@ const css = `
 .ftoc {
   position: fixed;
   right: 0.9rem;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 9rem;
   z-index: 40;
   display: flex;
   align-items: center;
@@ -34,7 +33,7 @@ const css = `
 .ftoc-panel {
   position: absolute;
   right: 0;
-  top: 50%;
+  top: 0;
   width: 17rem;
   max-height: 72vh;
   overflow-y: auto;
@@ -45,7 +44,7 @@ const css = `
   box-shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.35);
   opacity: 0;
   pointer-events: none;
-  transform: translate(8px, -50%);
+  transform: translateX(8px);
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 .ftoc:hover .ftoc-panel,
@@ -53,7 +52,7 @@ const css = `
 .ftoc.ftoc-open .ftoc-panel {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(0, -50%);
+  transform: none;
 }
 .ftoc:hover .ftoc-lines, .ftoc.ftoc-open .ftoc-lines { opacity: 0; }
 .ftoc-title {
