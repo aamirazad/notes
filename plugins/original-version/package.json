@@ -1,0 +1,30 @@
+{
+  "name": "original-version",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./components": {
+      "import": "./src/index.js"
+    }
+  },
+  "quartz": {
+    "name": "original-version",
+    "displayName": "Original Version Link",
+    "description": "Links an AI-edited note to the unedited original it was written from",
+    "version": "1.0.0",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "components": {
+      "OriginalVersion": {
+        "displayName": "Original version link",
+        "defaultPosition": "beforeBody",
+        "defaultPriority": 25
+      }
+    }
+  }
+}

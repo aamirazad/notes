@@ -292,6 +292,12 @@ plugins:
     layout:
       position: afterBody
       priority: 90
+  - source: ./plugins/original-version
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 25
+      condition: not-index
   - source: ./plugins/class-index
     enabled: true
     layout:
