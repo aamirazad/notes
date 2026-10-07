@@ -176,11 +176,19 @@
     onCleanup(() => ro.disconnect())
     document.fonts?.ready.then(relayout)
     for (const img of $$("img", article)) if (!img.complete) img.addEventListener("load", relayout, { once: true })
-    place()
-    requestAnimationFrame(() => {
-      holder.classList.add("xp-ready")
+    // belt and braces: late-loading fonts, math and images can shift the text
+    listen(window, "load", relayout)
+    let checks = 0
+    const settle = setInterval(() => {
       place()
-    })
+      if (++checks > 8) clearInterval(settle)
+    }, 400)
+    onCleanup(() => clearInterval(settle))
+    place()
+    holder.classList.add("xp-placed")
+    // turn on movement animations after fonts, math and images have settled
+    const ready = setTimeout(() => holder.classList.add("xp-ready"), 900)
+    onCleanup(() => clearTimeout(ready))
     onCleanup(() => {
       article.style.minHeight = ""
     })
