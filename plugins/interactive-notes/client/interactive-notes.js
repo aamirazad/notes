@@ -175,6 +175,7 @@
     notes.forEach((n) => ro.observe(n))
     onCleanup(() => ro.disconnect())
     document.fonts?.ready.then(relayout)
+    for (const img of $$("img", article)) if (!img.complete) img.addEventListener("load", relayout, { once: true })
     place()
     requestAnimationFrame(() => {
       holder.classList.add("xp-ready")
@@ -722,7 +723,7 @@
     const colors = (c) => [c.curve, c.accent, "#5d9b73", "#a65da6"]
 
     // animation state --------------------------------------------------
-    let progress = cfg.animate === false || cfg.animate == null ? 1 : 0 // 0..1
+    let progress = 1 // 0..1, the finished picture until someone presses play
     let raf = 0
     let playBtn = null
     const playable = ["draw", true, "revolve"].includes(cfg.animate) || kind === "revolve" || (kind === "parametric" && cfg.animate !== false)
@@ -975,7 +976,7 @@
         ctx.fillText(String(err.message), 12, 24)
       }
     }
-    if (kind === "revolve") progress = cfg.animate === false ? 1 : 0.35
+    if (kind === "revolve") progress = cfg.start ?? 0.3
     new ResizeObserver(() => resize()).observe(frame)
     const theme = new MutationObserver(paintNow)
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["saved-theme"] })

@@ -167,7 +167,20 @@ img,
 
 // the Excalidraw diagrams were exported for a dark background (light gray ink);
 // flip them in light mode so they read as dark ink on paper
-:root:not([saved-theme="dark"]) article img[src$=".svg"] {
+img.xp-drawing {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.2rem 0;
+  &.xp-center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+article img {
+  max-width: 100%;
+}
+:root:not([saved-theme="dark"]) article img.xp-drawing {
   filter: invert(1) hue-rotate(180deg);
   opacity: 0.85;
 }
@@ -205,4 +218,16 @@ footer {
   .section > .meta {
     font-variant-numeric: tabular-nums;
   }
+}
+
+// collapsed callouts squash children to height 0, but borders on interactive
+// blocks would still peek through, so hide the content outright
+.callout.is-collapsed > .callout-content {
+  display: none;
+}
+.callout > .callout-content > .xp-steps:first-child {
+  margin-top: 0.4rem;
+}
+.callout .xp-steps {
+  background: var(--light);
 }

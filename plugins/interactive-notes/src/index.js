@@ -127,10 +127,13 @@ function remarkInteractive() {
         } catch (e) {
           cfg = { error: String(e.message) }
         }
-        node.data = {
-          hName: "div",
-          hProperties: { className: ["xp-graph"], dataConfig: JSON.stringify(cfg) },
-          hChildren: [],
+        parent.children[index] = {
+          type: "xpGraph",
+          data: {
+            hName: "div",
+            hProperties: { className: ["xp-graph"], dataConfig: JSON.stringify(cfg) },
+            hChildren: [],
+          },
         }
         return SKIP
       }
@@ -194,6 +197,7 @@ function rehypeInteractive() {
       })
     }
     collect(tree, null)
+    visitTree(tree, fixEmbeddedSvg)
     if (!notes.size) return
 
     const rel = (from, id) => relative(from, `${slug}/${id}`)
@@ -246,6 +250,29 @@ function rehypeInteractive() {
 }
 
 const clone = (nodes) => JSON.parse(JSON.stringify(nodes))
+
+// Obsidian-style ![[drawing.svg|40%|center]] embeds arrive as <object> tags with the
+// size/alignment options stuffed into aria-label. Turn them into sized images.
+function fixEmbeddedSvg(node) {
+  if (node.type !== "element" || node.tagName !== "object") return
+  if (node.properties?.type !== "image/svg+xml") return
+  const opts = String(node.properties.ariaLabel ?? "").split("|").map((o) => o.trim())
+  const style = []
+  const classes = ["xp-drawing"]
+  for (const o of opts) {
+    if (/^\d+%$/.test(o)) style.push(`width:${o}`)
+    else if (/^\d+$/.test(o)) style.push(`width:${o}px`)
+    else if (o === "center") classes.push("xp-center")
+  }
+  node.tagName = "img"
+  node.properties = {
+    src: node.properties.data,
+    alt: "",
+    className: classes,
+    ...(style.length ? { style: style.join(";") } : {}),
+  }
+  node.children = []
+}
 
 function visitTree(node, fn) {
   fn(node)
