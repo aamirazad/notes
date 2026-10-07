@@ -1,3 +1,208 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// ---------------------------------------------------------------------------
+// Reading-first layout: a narrow text column, a margin for explanations,
+// and quiet chrome around it.
+// ---------------------------------------------------------------------------
+
+:root {
+  --text-measure: 40rem;
+  --xp-margin-width: 19rem;
+}
+
+html {
+  scroll-padding-top: 2rem;
+}
+
+body {
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// ---- grid: left sidebar + center (the right sidebar is unused on notes) ----
+.page > #quartz-body {
+  @media all and ($desktop) {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer";
+  }
+
+  & .sidebar.right:empty {
+    display: none;
+  }
+
+  & .sidebar.left {
+    gap: 1.6rem;
+  }
+
+  & .center {
+    padding: 0 2rem;
+    box-sizing: border-box;
+  }
+
+  // center column: text measure, plus room for the explanation margin on wide screens
+  & .center > .page-header,
+  & .center > article,
+  & .center > .page-footer,
+  & .center > hr {
+    max-width: var(--text-measure);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (min-width: 1100px) {
+    & .center {
+      --col: min(var(--text-measure), calc(100% - var(--xp-margin-width) - 2.25rem - 2.5rem));
+    }
+    & .center > .page-header,
+    & .center > article,
+    & .center > .page-footer,
+    & .center > hr {
+      max-width: var(--col);
+      // text + margin column sit centered as a pair
+      margin-left: max(0px, calc((100% - var(--col) - var(--xp-margin-width) - 2.25rem - 2.5rem) / 2));
+      margin-right: auto;
+    }
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1350px) {
+  :root {
+    --xp-margin-width: 16rem;
+  }
+}
+
+
+
+// ---- typography -----------------------------------------------------------
+article {
+  line-height: 1.72;
+  color: var(--darkgray);
+}
+
+article p,
+article li {
+  hyphens: manual;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--dark);
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+}
+
+article h1 {
+  font-size: 2rem;
+}
+article h2 {
+  font-size: 1.5rem;
+  margin-top: 2.6rem;
+  padding-top: 0.2rem;
+}
+article h3 {
+  font-size: 1.18rem;
+  margin-top: 2rem;
+}
+article h4 {
+  font-size: 1rem;
+}
+
+.page-header h1.article-title {
+  font-size: 2.2rem;
+  margin-bottom: 0.4rem;
+}
+
+// the note's own "# Title" duplicates the page title; hide the first one
+article > .markdown-preview-view > h1:first-child,
+article > h1:first-child {
+  display: none;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--lightgray);
+  margin: 2.4rem 0;
+}
+
+a.internal {
+  background-color: transparent;
+  color: var(--secondary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--secondary) 35%, transparent);
+  text-underline-offset: 3px;
+  padding: 0;
+  &:hover {
+    text-decoration-color: var(--secondary);
+  }
+}
+
+blockquote:not(.callout) {
+  border-left: 3px solid var(--lightgray);
+  margin-left: 0;
+  padding-left: 1.1rem;
+  color: var(--darkgray);
+  font-style: italic;
+}
+
+.katex {
+  font-size: 1.08em;
+}
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0;
+}
+
+img,
+.internal-embed img {
+  border-radius: 8px;
+}
+
+// the Excalidraw diagrams were exported for a dark background (light gray ink);
+// flip them in light mode so they read as dark ink on paper
+:root:not([saved-theme="dark"]) article img[src$=".svg"] {
+  filter: invert(1) hue-rotate(180deg);
+  opacity: 0.85;
+}
+
+// ---- callouts: calmer than the defaults -------------------------------------
+.callout {
+  border-radius: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color) 30%, transparent);
+  font-size: 0.97rem;
+}
+
+// ---- sidebar chrome ---------------------------------------------------------
+.sidebar.left {
+  .page-title {
+    font-size: 1.35rem;
+  }
+  .explorer {
+    font-size: 0.92rem;
+  }
+}
+
+// ---- footer: quiet --------------------------------------------------------------
+footer {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+// ---- folder (class) pages ---------------------------------------------------------
+.page-listing {
+  .section-li {
+    margin-bottom: 0.6rem;
+  }
+  .section > .meta {
+    font-variant-numeric: tabular-nums;
+  }
+}

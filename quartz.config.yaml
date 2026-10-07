@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: Quartz 5
+  pageTitle: Aamir's Notes
   pageTitleSuffix: ""
   enableSPA: true
   enablePopovers: true
@@ -12,39 +12,40 @@ configuration:
     - private
     - templates
     - .obsidian
+    - temp
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
     typography:
-      header: Schibsted Grotesk
-      body: Source Sans Pro
-      code: IBM Plex Mono
+      header: Inter
+      body: Literata
+      code: JetBrains Mono
     colors:
       lightMode:
-        light: "#faf8f8"
-        lightgray: "#e5e5e5"
-        gray: "#b8b8b8"
-        darkgray: "#4e4e4e"
-        dark: "#2b2b2b"
-        secondary: "#284b63"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#fff23688"
+        light: "#fcfbf8"
+        lightgray: "#e9e5dd"
+        gray: "#8d877c"
+        darkgray: "#3a3833"
+        dark: "#1f1e1b"
+        secondary: "#2f6690"
+        tertiary: "#c2702a"
+        highlight: rgba(47, 102, 144, 0.08)
+        textHighlight: "#ffe08a88"
       darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#7b97aa"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+        light: "#191816"
+        lightgray: "#33302b"
+        gray: "#837d72"
+        darkgray: "#d8d3c9"
+        dark: "#efebe3"
+        secondary: "#8ab8dc"
+        tertiary: "#f0a868"
+        highlight: rgba(138, 184, 220, 0.1)
+        textHighlight: "#b38f2a66"
 plugins:
   - source: "@quartz-community/created-modified-date"
     enabled: true
     options:
-      defaultDateType: modified
+      defaultDateType: created
       priority:
         - frontmatter
         - git
@@ -110,8 +111,23 @@ plugins:
     order: 92
   - source: "@quartz-community/quartz-fonts"
     enabled: true
+    options:
+      title:
+        name: Inter
+        weights: [600, 700]
+      header:
+        name: Inter
+        weights: [500, 600, 700]
+      interface:
+        name: Inter
+        weights: [400, 500, 600]
+      body:
+        name: Literata
+        weights: [400, 600, 700]
+        includeItalic: true
+      code: JetBrains Mono
   - source: "@quartz-themes/core"
-    enabled: true
+    enabled: false
     options:
       theme: default
       mode: both
@@ -146,7 +162,7 @@ plugins:
   - source: "@quartz-community/favicon"
     enabled: true
   - source: "@quartz-community/og-image"
-    enabled: true
+    enabled: false
   - source: "@quartz-community/cname"
     enabled: true
   - source: "@quartz-community/canvas-page"
@@ -163,7 +179,7 @@ plugins:
       position: left
       priority: 50
   - source: "@quartz-community/graph"
-    enabled: true
+    enabled: false
     layout:
       position: right
       priority: 10
@@ -176,7 +192,7 @@ plugins:
       groupOptions:
         grow: true
   - source: "@quartz-community/backlinks"
-    enabled: true
+    enabled: false
     layout:
       position: right
       priority: 50
@@ -229,9 +245,7 @@ plugins:
   - source: "@quartz-community/footer"
     enabled: true
     options:
-      links:
-        GitHub: https://github.com/jackyzha0/quartz
-        Discord Community: https://discord.gg/cRFFHYye7t
+      links: {}
     layout:
       position: footer
       priority: 50
@@ -266,6 +280,21 @@ plugins:
       position: beforeBody
       priority: 15
       display: all
+  - source: ./plugins/interactive-notes
+    enabled: true
+    order: 85
+  - source: ./plugins/explanation-pages
+    enabled: true
+  - source: ./plugins/floating-toc
+    enabled: true
+    layout:
+      position: afterBody
+      priority: 90
+  - source: ./plugins/class-index
+    enabled: true
+    layout:
+      position: afterBody
+      priority: 5
   - source: "@quartz-community/obsidian-plugin-excalidraw"
     enabled: true
     options:
@@ -285,7 +314,9 @@ layout:
         beforeBody: []
         left: []
         right: []
-    content: {}
+    content:
+      positions:
+        right: []
     folder:
       exclude:
         - reader-mode
