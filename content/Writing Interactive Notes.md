@@ -37,7 +37,7 @@ Explanations nest as deep as you like.
 
 Separate steps with `---`. The first `$$` block in each step is the equation and everything after it is the explanation. Whatever changed from the previous equation is highlighted automatically. Wrap a part in `\hl{...}` to choose the highlight yourself, or add `{plain}` to turn highlighting off.
 
-Once the block scrolls into view it plays itself: the ring under it fills up and moves on to the next step, lingering longer on steps with more to read. Click the ring to pause, and hover it for back and forward buttons. The arrow keys and space bar work too when the block has focus.
+Hover over the block and it starts playing: the ring under it fills up and moves on to the next step, lingering longer on steps with more to read. Moving the pointer away pauses it. Click the ring to play it yourself, and it keeps going until you click it again. Hover the ring for back and forward buttons. On touch screens it plays once it scrolls into view. The arrow keys and space bar work too when the block has focus.
 
 ```markdown
 :::steps{title="Solve for t"}

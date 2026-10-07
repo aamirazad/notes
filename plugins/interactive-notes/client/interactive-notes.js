@@ -58,7 +58,23 @@
     // the article only ever grows while notes shuffle around. If it shrank,
     // a reader scrolled to the very bottom would be yanked upward and lose
     // the text they were hovering. A real resize starts the count again.
-    let minNeed = 0;
+    let minNow = 0;
+    let wanted = 0;
+
+    // The article makes room for the last note. It may grow at any time, but
+    // it only shrinks as far as it can without the browser having to scroll:
+    // otherwise a reader at the very bottom, hovering text whose note moves,
+    // would be yanked upward and lose what they were hovering.
+    const fitHeight = () => {
+      if (wanted >= minNow) minNow = wanted;
+      else {
+        const doc = document.documentElement;
+        const spare = doc.scrollHeight - window.innerHeight - window.scrollY;
+        if (spare <= 0) return;
+        minNow = Math.max(wanted, minNow - spare);
+      }
+      article.style.minHeight = `${Math.round(minNow)}px`;
+    };
 
     // fade the bottom of a note only while there is more to scroll to
     const fade = (body) =>
@@ -119,8 +135,8 @@
           last.h +
           24 +
           (top - (article.getBoundingClientRect().top + window.scrollY));
-        minNeed = Math.max(minNeed, need);
-        article.style.minHeight = `${Math.round(minNeed)}px`;
+        wanted = Math.max(0, need);
+        fitHeight();
       }
       for (const n of notes.values()) {
         const body = $(".xp-note-body", n);
@@ -198,13 +214,14 @@
     listen(document, "keydown", (e) => e.key === "Escape" && closeSheet());
 
     const relayout = () => requestAnimationFrame(place);
-    const resized = () => {
-      minNeed = 0;
-      relayout();
-    };
-    listen(window, "resize", resized);
-    WIDE.addEventListener("change", resized);
-    onCleanup(() => WIDE.removeEventListener("change", resized));
+    listen(window, "resize", relayout);
+    WIDE.addEventListener("change", relayout);
+    onCleanup(() => WIDE.removeEventListener("change", relayout));
+    // a shrink postponed because the reader was at the bottom can finish
+    // once they scroll up
+    listen(window, "scroll", () => minNow > wanted && fitHeight(), {
+      passive: true,
+    });
     // math and images change heights after load
     const ro = new ResizeObserver(relayout);
     ro.observe(article);
@@ -342,6 +359,7 @@
     return Math.min(11000, 2600 + words * 230);
   };
 
+  const NO_HOVER = window.matchMedia("(hover: none) and (pointer: coarse)");
   function initSteps() {
     for (const box of $$(".xp-steps")) {
       if (box.dataset.ready) continue;
@@ -349,7 +367,12 @@
       const steps = $$(":scope > .xp-step", box);
       if (!steps.length) continue;
       let shown = 1;
-      let userPaused = false;
+      // what is driving playback: null (stopped), "hover" (only while the
+      // pointer is over the block), "manual" (the ring was clicked, so keep
+      // going until clicked again) or "view" (touch screens, while visible)
+      let mode = null;
+      // an explicit pause wins over hovering until the pointer leaves
+      let held = false;
       let inView = false;
 
       if (box.dataset.title) {
@@ -373,7 +396,8 @@
         return b;
       };
       const back = navBtn("Previous step", "M10 3.5 5.5 8l4.5 4.5", () => {
-        userPaused = true;
+        mode = null;
+        held = true;
         go(shown - 1);
       });
       const fwd = navBtn("Next step", "M6 3.5 10.5 8 6 12.5", () =>
@@ -404,11 +428,29 @@
       ringSvg.append(track, fill, glyph);
       ring.append(ringSvg);
       ring.addEventListener("click", () => {
+        held = false;
         if (shown === steps.length) {
-          userPaused = false;
+          mode = "manual";
           go(1);
+        } else if (mode) {
+          mode = null;
+          held = true;
+          sync();
         } else {
-          userPaused = !userPaused;
+          mode = "manual";
+          sync();
+        }
+      });
+      box.addEventListener("mouseenter", () => {
+        if (!mode && !held && shown < steps.length) {
+          mode = "hover";
+          sync();
+        }
+      });
+      box.addEventListener("mouseleave", () => {
+        held = false;
+        if (mode === "hover") {
+          mode = null;
           sync();
         }
       });
@@ -432,33 +474,41 @@
         }
       });
 
-      // only count down while the controls (just under the newest step) are on screen
+      // never count down off screen. Without a pointer to hover with, start
+      // playing once the controls (just under the newest step) come into view.
       const io = new IntersectionObserver(
         ([entry]) => {
           inView = entry.isIntersecting;
+          if (
+            NO_HOVER.matches &&
+            entry.intersectionRatio === 1 &&
+            !mode &&
+            !held
+          )
+            mode = "view";
           sync();
         },
-        { threshold: 1 },
+        { threshold: [0, 1] },
       );
       io.observe(controls);
       onCleanup(() => io.disconnect());
 
       function sync() {
         const done = shown === steps.length;
-        const running = !done && !userPaused && inView;
+        const running = !done && !!mode && inView;
         box.classList.toggle("xp-done", done);
         box.classList.toggle("xp-running", running);
         glyph.setAttribute(
           "d",
-          done ? ICONS.replay : userPaused ? ICONS.play : ICONS.pause,
+          done ? ICONS.replay : mode ? ICONS.pause : ICONS.play,
         );
         ring.setAttribute(
           "aria-label",
           done
             ? "Start again from the first step"
-            : userPaused
-              ? "Resume playing the steps"
-              : "Pause the steps",
+            : mode
+              ? "Pause the steps"
+              : "Play the steps",
         );
       }
       function restartRing() {
