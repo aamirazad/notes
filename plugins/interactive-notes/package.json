@@ -1,0 +1,19 @@
+{
+  "name": "interactive-notes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Margin explanations, step-by-step equations, quizzes and animated graphs for Quartz notes",
+  "main": "./src/index.js",
+  "exports": { ".": { "import": "./src/index.js" } },
+  "quartz": {
+    "name": "interactive-notes",
+    "displayName": "Interactive Notes",
+    "description": "Directive-based interactive elements for notes",
+    "version": "1.0.0",
+    "category": "transformer",
+    "quartzVersion": ">=5.0.0",
+    "defaultOrder": 85,
+    "defaultEnabled": true
+  }
+}
