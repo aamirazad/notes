@@ -5,8 +5,12 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": { "import": "./src/index.js" },
-    "./components": { "import": "./src/index.js" }
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./components": {
+      "import": "./src/index.js"
+    }
   },
   "quartz": {
     "name": "floating-toc",
@@ -16,7 +20,11 @@
     "category": "component",
     "quartzVersion": ">=5.0.0",
     "components": {
-      "FloatingToc": { "displayName": "Floating TOC", "defaultPosition": "afterBody", "defaultPriority": 90 }
+      "FloatingToc": {
+        "displayName": "Floating TOC",
+        "defaultPosition": "afterBody",
+        "defaultPriority": 90
+      }
     }
   }
 }

@@ -5,8 +5,12 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": { "import": "./src/index.js" },
-    "./components": { "import": "./src/index.js" }
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./components": {
+      "import": "./src/index.js"
+    }
   },
   "quartz": {
     "name": "class-index",
@@ -16,7 +20,11 @@
     "category": "component",
     "quartzVersion": ">=5.0.0",
     "components": {
-      "ClassIndex": { "displayName": "Class Index", "defaultPosition": "afterBody", "defaultPriority": 5 }
+      "ClassIndex": {
+        "displayName": "Class Index",
+        "defaultPosition": "afterBody",
+        "defaultPriority": 5
+      }
     }
   }
 }

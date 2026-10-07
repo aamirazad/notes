@@ -1,4 +1,4 @@
-import { h } from "preact"
+import { h } from "preact";
 
 const css = `
 .ftoc {
@@ -88,7 +88,7 @@ const css = `
   .ftoc.ftoc-open .ftoc-panel { top: auto; bottom: 0; transform: none; opacity: 1; pointer-events: auto; }
 }
 @media print { .ftoc { display: none; } }
-`
+`;
 
 const script = `
 (() => {
@@ -134,21 +134,33 @@ const script = `
   }
   document.addEventListener("nav", setup)
 })()
-`
+`;
 
 export const FloatingToc = () => {
   const Component = ({ fileData }) => {
     // the note's own "# Title" duplicates the page title, so leave it out
-    const title = fileData?.frontmatter?.title
-    const entries = (fileData?.toc ?? []).filter((t) => !(t.depth === 0 && t.text === title))
-    if (entries.length < 2) return null
-    const base = Math.min(...entries.map((t) => t.depth))
-    const toc = entries.map((t) => ({ ...t, depth: t.depth - base }))
+    const title = fileData?.frontmatter?.title;
+    const entries = (fileData?.toc ?? []).filter(
+      (t) => !(t.depth === 0 && t.text === title),
+    );
+    if (entries.length < 2) return null;
+    const base = Math.min(...entries.map((t) => t.depth));
+    const toc = entries.map((t) => ({ ...t, depth: t.depth - base }));
     return h("nav", { class: "ftoc", "aria-label": "Table of contents" }, [
       h(
         "div",
-        { class: "ftoc-lines", role: "button", tabIndex: 0, "aria-label": "Show table of contents" },
-        toc.map((t) => h("span", { class: `ftoc-line depth-${t.depth}`, "data-for": t.slug })),
+        {
+          class: "ftoc-lines",
+          role: "button",
+          tabIndex: 0,
+          "aria-label": "Show table of contents",
+        },
+        toc.map((t) =>
+          h("span", {
+            class: `ftoc-line depth-${t.depth}`,
+            "data-for": t.slug,
+          }),
+        ),
       ),
       h("div", { class: "ftoc-panel" }, [
         h("div", { class: "ftoc-title" }, "On this page"),
@@ -156,15 +168,19 @@ export const FloatingToc = () => {
           "ol",
           null,
           toc.map((t) =>
-            h("li", { class: `depth-${t.depth}` }, h("a", { href: `#${t.slug}`, "data-for": t.slug }, t.text)),
+            h(
+              "li",
+              { class: `depth-${t.depth}` },
+              h("a", { href: `#${t.slug}`, "data-for": t.slug }, t.text),
+            ),
           ),
         ),
       ]),
-    ])
-  }
-  Component.css = css
-  Component.afterDOMLoaded = script
-  return Component
-}
+    ]);
+  };
+  Component.css = css;
+  Component.afterDOMLoaded = script;
+  return Component;
+};
 
-export default FloatingToc
+export default FloatingToc;

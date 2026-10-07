@@ -5,7 +5,11 @@
   "type": "module",
   "description": "Margin explanations, step-by-step equations, quizzes and animated graphs for Quartz notes",
   "main": "./src/index.js",
-  "exports": { ".": { "import": "./src/index.js" } },
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
   "quartz": {
     "name": "interactive-notes",
     "displayName": "Interactive Notes",

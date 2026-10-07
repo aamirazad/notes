@@ -1,17 +1,21 @@
-import { h } from "preact"
-import { htmlToJsx } from "@quartz-community/utils"
+import { h } from "preact";
+import { htmlToJsx } from "@quartz-community/utils";
 
 // Every `:::explain` block in a note gets its own page at <note>/<id>. The
 // transformer (interactive-notes) already rendered each one into hast.
 const ExplanationBody = () => {
   const Body = ({ fileData }) => {
-    const root = fileData.xpRoot
+    const root = fileData.xpRoot;
     return h("article", { class: "popover-hint xp-explanation-page" }, [
-      h("div", { class: "markdown-preview-view markdown-rendered" }, root ? htmlToJsx(root) : null),
-    ])
-  }
-  return Body
-}
+      h(
+        "div",
+        { class: "markdown-preview-view markdown-rendered" },
+        root ? htmlToJsx(root) : null,
+      ),
+    ]);
+  };
+  return Body;
+};
 
 export const ExplanationPages = () => ({
   name: "ExplanationPages",
@@ -19,10 +23,10 @@ export const ExplanationPages = () => ({
   layout: "content",
   match: ({ fileData }) => fileData.xpExplanation === true,
   generate({ content }) {
-    const pages = []
+    const pages = [];
     for (const [, file] of content) {
-      const data = file.data
-      if (!data.xpPages) continue
+      const data = file.data;
+      if (!data.xpPages) continue;
       for (const page of Object.values(data.xpPages)) {
         pages.push({
           slug: `${data.slug}/${page.id}`,
@@ -39,12 +43,12 @@ export const ExplanationPages = () => ({
               course: data.frontmatter?.course,
             },
           },
-        })
+        });
       }
     }
-    return pages
+    return pages;
   },
   body: ExplanationBody,
-})
+});
 
-export default ExplanationPages
+export default ExplanationPages;
