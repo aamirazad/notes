@@ -249,15 +249,41 @@ function rehypeInteractive() {
           tabIndex: 0,
         },
         [
-          el("div", { className: ["xp-note-title"] }, [
-            { type: "text", value: n.title },
-          ]),
-          el("div", { className: ["xp-note-body"] }, clone(n.node.children)),
           el(
             "a",
-            { className: ["xp-note-more", "internal"], href: rel(from, n.id) },
-            [{ type: "text", value: "Read in full →" }],
+            {
+              className: ["xp-note-expand", "internal"],
+              href: rel(from, n.id),
+              ariaLabel: `Open “${n.title}” on its own page`,
+              title: "Open on its own page",
+            },
+            [
+              el(
+                "svg",
+                {
+                  viewBox: "0 0 16 16",
+                  width: 14,
+                  height: 14,
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: 1.6,
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  ariaHidden: "true",
+                },
+                [
+                  el(
+                    "path",
+                    {
+                      d: "M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9",
+                    },
+                    [],
+                  ),
+                ],
+              ),
+            ],
           ),
+          el("div", { className: ["xp-note-body"] }, clone(n.node.children)),
         ],
       );
     const notesFor = (parentId, from) =>

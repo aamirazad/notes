@@ -55,6 +55,23 @@
     let active = null;
     let pinned = null;
     let leaveTimer = 0;
+    // the article only ever grows while notes shuffle around. If it shrank,
+    // a reader scrolled to the very bottom would be yanked upward and lose
+    // the text they were hovering. A real resize starts the count again.
+    let minNeed = 0;
+
+    // fade the bottom of a note only while there is more to scroll to
+    const fade = (body) =>
+      body.classList.toggle(
+        "xp-more",
+        body.scrollTop + body.clientHeight < body.scrollHeight - 2,
+      );
+    for (const n of notes.values()) {
+      const body = $(".xp-note-body", n);
+      if (!body) continue;
+      listen(body, "scroll", () => fade(body), { passive: true });
+      listen(body, "transitionend", () => fade(body));
+    }
 
     const place = () => {
       if (!WIDE.matches) {
@@ -97,8 +114,17 @@
         it.note.style.transform = `translateY(${Math.round(it.y)}px)`;
       const last = items.at(-1);
       if (last) {
-        const need = last.y + last.h + 24;
-        article.style.minHeight = `${Math.max(0, need + (top - (article.getBoundingClientRect().top + window.scrollY)))}px`;
+        const need =
+          last.y +
+          last.h +
+          24 +
+          (top - (article.getBoundingClientRect().top + window.scrollY));
+        minNeed = Math.max(minNeed, need);
+        article.style.minHeight = `${Math.round(minNeed)}px`;
+      }
+      for (const n of notes.values()) {
+        const body = $(".xp-note-body", n);
+        if (body) fade(body);
       }
     };
 
@@ -172,9 +198,13 @@
     listen(document, "keydown", (e) => e.key === "Escape" && closeSheet());
 
     const relayout = () => requestAnimationFrame(place);
-    listen(window, "resize", relayout);
-    WIDE.addEventListener("change", relayout);
-    onCleanup(() => WIDE.removeEventListener("change", relayout));
+    const resized = () => {
+      minNeed = 0;
+      relayout();
+    };
+    listen(window, "resize", resized);
+    WIDE.addEventListener("change", resized);
+    onCleanup(() => WIDE.removeEventListener("change", resized));
     // math and images change heights after load
     const ro = new ResizeObserver(relayout);
     ro.observe(article);
@@ -201,6 +231,82 @@
     });
   }
 
+  // ===================================================================
+  // Scroll position across back/forward
+  // ===================================================================
+  // Quartz swaps pages in place, so the browser can't restore the scroll
+  // position on its own: by the time the old page is back it has already
+  // scrolled to the top. Remember each entry's position in history.state and
+  // put it back once the page has been rebuilt.
+  if (!window.__xpScrollMemory) {
+    window.__xpScrollMemory = true;
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    // On a first visit the explorer calls scrollIntoView() on the active file,
+    // which drags the whole window down with it. It skips that when it has a
+    // saved scroll position of its own, so give it one.
+    try {
+      if (sessionStorage.getItem("explorerScrollTop") == null)
+        sessionStorage.setItem("explorerScrollTop", "0");
+    } catch {}
+    let restoring = false;
+    let saveTimer = 0;
+    let lastPath = location.pathname;
+    const remember = () => {
+      if (restoring) return;
+      history.replaceState(
+        { ...(history.state ?? {}), xpScroll: window.scrollY },
+        "",
+      );
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(remember, 150);
+      },
+      { passive: true },
+    );
+    // a click may be about to navigate away, so save right now
+    window.addEventListener("click", remember, true);
+    window.addEventListener("pagehide", remember);
+    window.addEventListener("popstate", () => {
+      clearTimeout(saveTimer);
+      // hash-only changes on the same page don't trigger a page swap
+      if (location.pathname !== lastPath) restoring = true;
+    });
+    const restore = (y) => {
+      let tries = 0;
+      const step = () => {
+        window.scrollTo({ top: y, behavior: "instant" });
+        // late fonts, math and the margin notes can still be growing the page
+        if (Math.abs(window.scrollY - y) > 2 && tries++ < 30)
+          setTimeout(step, 50);
+        else restoring = false;
+      };
+      requestAnimationFrame(step);
+    };
+    let first = true;
+    document.addEventListener("nav", () => {
+      lastPath = location.pathname;
+      const y = history.state?.xpScroll;
+      if (first) {
+        first = false;
+        const kind = performance.getEntriesByType?.("navigation")[0]?.type;
+        if (
+          typeof y === "number" &&
+          (kind === "reload" || kind === "back_forward")
+        ) {
+          restoring = true;
+          restore(y);
+        }
+        return;
+      }
+      if (!restoring) return;
+      if (typeof y === "number") restore(y);
+      else restoring = false;
+    });
+  }
+
   function navigate(href) {
     const a = h("a");
     a.href = href;
@@ -214,6 +320,28 @@
   // ===================================================================
   // Step-by-step equations
   // ===================================================================
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const RING_R = 15;
+  const RING_C = 2 * Math.PI * RING_R;
+  const ICONS = {
+    pause: "M13.5 11.5v9M18.5 11.5v9",
+    play: "M13.5 11v10l8-5z",
+    replay: "M11 16a5 5 0 1 0 1.6-3.7M12.6 9.3v3h3",
+  };
+  const svg = (tag, attrs) => {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  };
+  // how long to linger on a step before moving on: longer if it has prose
+  const stepDuration = (step) => {
+    const words = ($(".xp-step-text", step)?.textContent ?? "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+    return Math.min(11000, 2600 + words * 230);
+  };
+
   function initSteps() {
     for (const box of $$(".xp-steps")) {
       if (box.dataset.ready) continue;
@@ -221,35 +349,127 @@
       const steps = $$(":scope > .xp-step", box);
       if (!steps.length) continue;
       let shown = 1;
-      const bar = h("div", "xp-steps-bar");
-      const title = h("div", "xp-steps-title");
-      title.append(h("span", "xp-badge", "Step by step"));
-      if (box.dataset.title)
-        title.append(h("span", "xp-steps-name", box.dataset.title));
-      const count = h("span", "xp-steps-count");
-      const btn = (label, text, fn) => {
-        const b = h("button", "xp-btn", text);
+      let userPaused = false;
+      let inView = false;
+
+      if (box.dataset.title) {
+        const bar = h("div", "xp-steps-bar");
+        bar.append(h("span", "xp-steps-name", box.dataset.title));
+        box.prepend(bar);
+      }
+
+      const navBtn = (label, path, fn) => {
+        const b = h("button", "xp-step-nav");
         b.type = "button";
         b.setAttribute("aria-label", label);
+        b.title = label;
+        const icon = svg("svg", {
+          viewBox: "0 0 16 16",
+          "aria-hidden": "true",
+        });
+        icon.append(svg("path", { d: path }));
+        b.append(icon);
         b.addEventListener("click", fn);
         return b;
       };
-      const first = btn("Back to the first step", "⏮", () => go(1));
-      const back = btn("Previous step", "◀ Back", () => go(shown - 1));
-      const next = btn("Next step", "Next ▶", () => go(shown + 1));
-      next.classList.add("xp-btn-primary");
-      const last = btn("Skip to the end", "⏭", () => go(steps.length));
+      const back = navBtn("Previous step", "M10 3.5 5.5 8l4.5 4.5", () => {
+        userPaused = true;
+        go(shown - 1);
+      });
+      const fwd = navBtn("Next step", "M6 3.5 10.5 8 6 12.5", () =>
+        go(shown + 1),
+      );
+
+      const ring = h("button", "xp-ring");
+      ring.type = "button";
+      const ringSvg = svg("svg", {
+        viewBox: "0 0 32 32",
+        "aria-hidden": "true",
+      });
+      const track = svg("circle", {
+        class: "xp-ring-track",
+        cx: 16,
+        cy: 16,
+        r: RING_R,
+      });
+      const fill = svg("circle", {
+        class: "xp-ring-fill",
+        cx: 16,
+        cy: 16,
+        r: RING_R,
+        "stroke-dasharray": RING_C.toFixed(2),
+        "stroke-dashoffset": RING_C.toFixed(2),
+      });
+      const glyph = svg("path", { class: "xp-ring-icon" });
+      ringSvg.append(track, fill, glyph);
+      ring.append(ringSvg);
+      ring.addEventListener("click", () => {
+        if (shown === steps.length) {
+          userPaused = false;
+          go(1);
+        } else {
+          userPaused = !userPaused;
+          sync();
+        }
+      });
+      fill.addEventListener("animationend", () => {
+        if (shown < steps.length) go(shown + 1);
+      });
+
+      const count = h("span", "xp-steps-count");
       const controls = h("div", "xp-steps-controls");
-      controls.append(first, back, next, last);
-      bar.append(title, count);
-      box.prepend(bar);
+      controls.append(count, back, ring, fwd);
       box.append(controls);
+
       box.tabIndex = 0;
       box.addEventListener("keydown", (e) => {
         if (e.target !== box) return;
         if (e.key === "ArrowRight") go(shown + 1);
-        else if (e.key === "ArrowLeft") go(shown - 1);
+        else if (e.key === "ArrowLeft") back.click();
+        else if (e.key === " ") {
+          e.preventDefault();
+          ring.click();
+        }
       });
+
+      // only count down while the controls (just under the newest step) are on screen
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          inView = entry.isIntersecting;
+          sync();
+        },
+        { threshold: 1 },
+      );
+      io.observe(controls);
+      onCleanup(() => io.disconnect());
+
+      function sync() {
+        const done = shown === steps.length;
+        const running = !done && !userPaused && inView;
+        box.classList.toggle("xp-done", done);
+        box.classList.toggle("xp-running", running);
+        glyph.setAttribute(
+          "d",
+          done ? ICONS.replay : userPaused ? ICONS.play : ICONS.pause,
+        );
+        ring.setAttribute(
+          "aria-label",
+          done
+            ? "Start again from the first step"
+            : userPaused
+              ? "Resume playing the steps"
+              : "Pause the steps",
+        );
+      }
+      function restartRing() {
+        fill.style.animation = "none";
+        void fill.getBoundingClientRect();
+        fill.style.animation = "";
+        fill.style.setProperty(
+          "--xp-step-dur",
+          `${stepDuration(steps[shown - 1])}ms`,
+        );
+      }
       function go(n) {
         shown = Math.max(1, Math.min(steps.length, n));
         steps.forEach((s, i) => {
@@ -257,9 +477,10 @@
           s.classList.toggle("xp-latest", i === shown - 1);
         });
         count.textContent = `${shown} / ${steps.length}`;
-        first.disabled = back.disabled = shown === 1;
-        next.disabled = last.disabled = shown === steps.length;
-        box.classList.toggle("xp-done", shown === steps.length);
+        back.disabled = shown === 1;
+        fwd.disabled = shown === steps.length;
+        restartRing();
+        sync();
       }
       go(1);
     }
@@ -275,7 +496,6 @@
       const choices = $$(":scope > .xp-choices > .xp-choice", quiz);
       const solution = $(":scope > .xp-solution", quiz);
       const question = $(":scope > .xp-q", quiz);
-      quiz.prepend(h("div", "xp-quiz-badge", "Check your understanding"));
       const feedback = h("div", "xp-feedback");
       feedback.hidden = true;
       $(":scope > .xp-choices", quiz).after(feedback);

@@ -70,7 +70,7 @@ article:has(> .xp-notes),
   left: 0;
   width: 100%;
   box-sizing: border-box;
-  padding: 0.8rem 1rem 0.7rem;
+  padding: 0.8rem 1.9rem 0.7rem 1rem;
   background: var(--xp-note-bg);
   border: 1px dashed var(--xp-accent-line);
   border-radius: var(--xp-radius);
@@ -99,27 +99,54 @@ article:has(> .xp-notes),
   box-shadow: 0 6px 24px -12px rgba(0, 0, 0, 0.35);
   z-index: 2;
 }
-.xp-note-title {
-  font-family: var(--headerFont);
-  font-weight: 600;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--xp-accent);
-  margin-bottom: 0.35rem;
+.xp-note-expand {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  color: var(--gray) !important;
+  background: none !important;
+  opacity: 0.55;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
+.xp-note:hover .xp-note-expand,
+.xp-note.xp-active .xp-note-expand {
+  opacity: 1;
+}
+.xp-note-expand:hover,
+.xp-note-expand:focus-visible {
+  color: var(--xp-accent) !important;
+  background: var(--xp-accent-soft) !important;
+}
+/* the body scrolls in place; the fade only shows while there is more below */
 .xp-note-body {
   max-height: 15.5em;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lightgray) transparent;
+  padding-right: 0.25rem;
+  transition: max-height 0.3s ease;
+}
+.xp-note-body.xp-more {
   -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
   mask-image: linear-gradient(to bottom, #000 78%, transparent);
-  transition: max-height 0.3s ease;
 }
 .xp-note.xp-active .xp-note-body {
   max-height: 26em;
 }
 .xp-note-body > :first-child {
   margin-top: 0;
+}
+.xp-note-body > :last-child {
+  margin-bottom: 0.15rem;
 }
 .xp-note-body p {
   margin: 0 0 0.6em;
@@ -129,14 +156,6 @@ article:has(> .xp-notes),
   font-size: 0.95em;
   overflow-x: auto;
   overflow-y: hidden;
-}
-.xp-note-more {
-  display: inline-block;
-  margin-top: 0.3rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--xp-accent) !important;
-  background: none !important;
 }
 
 /* narrow screens: notes become a bottom sheet opened from the anchor */
@@ -168,6 +187,11 @@ article:has(> .xp-notes),
   mask-image: none;
   -webkit-mask-image: none;
 }
+.xp-sheet .xp-note-expand {
+  position: static;
+  float: right;
+  margin-left: 0.3rem;
+}
 .xp-sheet-close {
   float: right;
   border: none;
@@ -197,15 +221,6 @@ article:has(> .xp-notes),
 }
 
 /* ------------------------------------------------------------ shared */
-.xp-badge,
-.xp-quiz-badge {
-  font-family: var(--headerFont);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--xp-accent);
-}
 .xp-btn {
   font: inherit;
   font-size: 0.85rem;
@@ -243,7 +258,6 @@ article:has(> .xp-notes),
   margin: 1.6rem 0;
   padding: 0.9rem 1.1rem 0.8rem;
   border: 1px solid var(--lightgray);
-  border-left: 3px solid var(--xp-accent);
   border-radius: var(--xp-radius);
   background: color-mix(in srgb, var(--light) 92%, var(--xp-accent) 8%);
 }
@@ -251,26 +265,12 @@ article:has(> .xp-notes),
   outline: 2px solid var(--xp-accent-line);
 }
 .xp-steps-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
   margin-bottom: 0.3rem;
-}
-.xp-steps-title {
-  display: flex;
-  gap: 0.6rem;
-  align-items: baseline;
 }
 .xp-steps-name {
   font-family: var(--headerFont);
   font-weight: 600;
   color: var(--dark);
-}
-.xp-steps-count {
-  font-variant-numeric: tabular-nums;
-  font-size: 0.85rem;
-  color: var(--gray);
 }
 .xp-step {
   padding: 0.2rem 0;
@@ -319,9 +319,117 @@ article:has(> .xp-notes),
 }
 .xp-steps-controls {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.15rem;
   justify-content: flex-end;
-  padding-top: 0.6rem;
+  align-items: center;
+  padding-top: 0.45rem;
+}
+.xp-steps-count {
+  margin-right: 0.45rem;
+  font-family: var(--headerFont);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+/* back / forward stay tucked away until the reader reaches for the ring */
+.xp-step-nav {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--darkgray);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.xp-step-nav svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.xp-steps-controls:hover .xp-step-nav,
+.xp-steps-controls:focus-within .xp-step-nav,
+.xp-steps:focus-visible .xp-step-nav {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.xp-step-nav:hover:not(:disabled) {
+  color: var(--xp-accent);
+  background: var(--xp-accent-soft);
+}
+.xp-steps-controls .xp-step-nav:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.xp-ring {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--xp-accent);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.xp-ring:hover {
+  background: var(--xp-accent-soft);
+}
+.xp-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.xp-ring-track,
+.xp-ring-fill {
+  fill: none;
+  stroke-width: 2.4;
+}
+.xp-ring-track {
+  stroke: var(--lightgray);
+}
+.xp-ring-fill {
+  stroke: var(--xp-accent);
+  stroke-linecap: round;
+  animation: xp-ring var(--xp-step-dur, 4s) linear forwards paused;
+}
+.xp-running .xp-ring-fill {
+  animation-play-state: running;
+}
+.xp-done .xp-ring-fill {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+.xp-ring-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(90deg);
+  transform-origin: 16px 16px;
+}
+@keyframes xp-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 @keyframes xp-in {
   from {

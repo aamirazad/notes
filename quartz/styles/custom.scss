@@ -236,6 +236,7 @@ footer {
 .callout > .callout-content > .xp-steps:first-child {
   margin-top: 0.4rem;
 }
+// inside a callout the steps blend into the callout's own tint
 .callout .xp-steps {
-  background: var(--light);
+  background: none;
 }
