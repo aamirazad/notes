@@ -1,0 +1,641 @@
+/* ------------------------------------------------------------------
+   Interactive notes: margin explanations, steps, quizzes, graphs
+   Colours come from custom.scss (--xp-*) with sensible fallbacks.
+------------------------------------------------------------------- */
+
+:root {
+  --xp-accent: #c2702a;
+  --xp-accent-soft: rgba(214, 140, 66, 0.14);
+  --xp-accent-line: rgba(194, 112, 42, 0.55);
+  --xp-note-bg: #fbf5ec;
+  --xp-good: #3f8a5c;
+  --xp-good-soft: rgba(63, 138, 92, 0.12);
+  --xp-bad: #b5483d;
+  --xp-bad-soft: rgba(181, 72, 61, 0.1);
+  --xp-new: #b3541e;
+  --xp-new-bg: rgba(240, 160, 80, 0.2);
+  --xp-curve: #8a6a45;
+  --xp-radius: 10px;
+}
+:root[saved-theme="dark"] {
+  --xp-accent: #f0a868;
+  --xp-accent-soft: rgba(240, 168, 104, 0.12);
+  --xp-accent-line: rgba(240, 168, 104, 0.55);
+  --xp-note-bg: #26211c;
+  --xp-good: #79c493;
+  --xp-good-soft: rgba(121, 196, 147, 0.12);
+  --xp-bad: #ec8a80;
+  --xp-bad-soft: rgba(236, 138, 128, 0.12);
+  --xp-new: #ffb37a;
+  --xp-new-bg: rgba(255, 179, 122, 0.16);
+  --xp-curve: #e8d9bc;
+}
+
+/* ---------------------------------------------------------- anchors */
+.xp-anchor {
+  cursor: help;
+  border-bottom: 2px solid var(--xp-accent-line);
+  border-radius: 2px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+  padding: 0 1px;
+}
+.xp-anchor:hover,
+.xp-anchor.xp-active,
+.xp-anchor:focus-visible {
+  background: var(--xp-accent-soft);
+  border-bottom-color: var(--xp-accent);
+  outline: none;
+}
+.xp-note .xp-anchor {
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------- margin notes */
+article:has(> .xp-notes),
+.markdown-rendered:has(> .xp-notes) {
+  position: relative;
+}
+.xp-notes {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 2.25rem);
+  width: var(--xp-margin-width, 300px);
+  height: 0;
+}
+.xp-note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1.9rem 0.7rem 1rem;
+  background: var(--xp-note-bg);
+  border: 1px dashed var(--xp-accent-line);
+  border-radius: var(--xp-radius);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--darkgray);
+  cursor: pointer;
+  opacity: 0;
+}
+/* only animate once the first layout has settled, so notes don't fly in on load */
+.xp-notes.xp-ready .xp-note {
+  transition:
+    transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.3s ease;
+}
+.xp-notes.xp-placed .xp-note {
+  opacity: 0.88;
+}
+.xp-notes.xp-placed .xp-note.xp-active,
+.xp-notes.xp-placed .xp-note:hover {
+  opacity: 1;
+  border-style: solid;
+  border-color: var(--xp-accent);
+  box-shadow: 0 6px 24px -12px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+.xp-note-expand {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  color: var(--gray) !important;
+  background: none !important;
+  opacity: 0.55;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+.xp-note:hover .xp-note-expand,
+.xp-note.xp-active .xp-note-expand {
+  opacity: 1;
+}
+.xp-note-expand:hover,
+.xp-note-expand:focus-visible {
+  color: var(--xp-accent) !important;
+  background: var(--xp-accent-soft) !important;
+}
+/* the body scrolls in place; the fade only shows while there is more below */
+.xp-note-body {
+  max-height: 15.5em;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lightgray) transparent;
+  padding-right: 0.25rem;
+  transition: max-height 0.3s ease;
+}
+.xp-note-body.xp-more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent);
+}
+.xp-note.xp-active .xp-note-body {
+  max-height: 26em;
+}
+.xp-note-body > :first-child {
+  margin-top: 0;
+}
+.xp-note-body > :last-child {
+  margin-bottom: 0.15rem;
+}
+.xp-note-body p {
+  margin: 0 0 0.6em;
+}
+.xp-note-body .katex-display {
+  margin: 0.5em 0;
+  font-size: 0.95em;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* narrow screens: notes become a bottom sheet opened from the anchor */
+.xp-notes.xp-narrow {
+  position: static;
+  width: auto;
+}
+.xp-notes.xp-narrow .xp-note {
+  display: none;
+  transform: none !important;
+}
+.xp-notes.xp-narrow .xp-note.xp-sheet {
+  display: block;
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  top: auto;
+  width: auto;
+  max-height: 70vh;
+  overflow: auto;
+  opacity: 1;
+  z-index: 50;
+  border-style: solid;
+  box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.4);
+}
+.xp-sheet .xp-note-body {
+  max-height: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+.xp-sheet .xp-note-expand {
+  position: static;
+  float: right;
+  margin-left: 0.3rem;
+}
+.xp-sheet-close {
+  float: right;
+  border: none;
+  background: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--darkgray);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------- explanation page */
+.xp-on {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0 0 1.5rem;
+  padding: 0.55rem 0.9rem;
+  border-left: 3px solid var(--xp-accent);
+  background: var(--xp-accent-soft);
+  border-radius: 0 var(--xp-radius) var(--xp-radius) 0;
+  font-size: 0.95rem;
+}
+.xp-on-label {
+  font-family: var(--headerFont);
+  font-weight: 600;
+  color: var(--xp-accent);
+}
+
+/* ------------------------------------------------------------ shared */
+.xp-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--darkgray);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.xp-btn:hover:not(:disabled) {
+  border-color: var(--xp-accent);
+  color: var(--xp-accent);
+}
+.xp-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.xp-btn-primary {
+  background: var(--xp-accent);
+  border-color: var(--xp-accent);
+  color: var(--light);
+}
+.xp-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  color: var(--light);
+}
+
+/* ------------------------------------------------------------ steps */
+.xp-steps {
+  margin: 1.6rem 0;
+  padding: 0.9rem 1.1rem 0.8rem;
+  border: 1px solid var(--lightgray);
+  border-radius: var(--xp-radius);
+  background: color-mix(in srgb, var(--light) 92%, var(--xp-accent) 8%);
+}
+.xp-steps:focus-visible {
+  outline: 2px solid var(--xp-accent-line);
+}
+.xp-steps-bar {
+  margin-bottom: 0.3rem;
+}
+.xp-steps-name {
+  font-family: var(--headerFont);
+  font-weight: 600;
+  color: var(--dark);
+}
+.xp-step {
+  padding: 0.2rem 0;
+  border-top: 1px dashed var(--lightgray);
+  animation: xp-in 0.35s ease;
+}
+.xp-step:first-of-type {
+  border-top: none;
+}
+.xp-step.xp-hidden {
+  display: none;
+}
+.xp-step:not(.xp-latest) {
+  opacity: 0.62;
+}
+.xp-step .xp-eq .katex-display {
+  margin: 0.55rem 0 0.25rem;
+}
+.xp-eq {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.xp-step-text {
+  font-size: 0.95rem;
+  color: var(--darkgray);
+}
+.xp-step-text > :first-child {
+  margin-top: 0.15rem;
+}
+.xp-step-text > :last-child {
+  margin-bottom: 0.5rem;
+}
+.xp-step:not(.xp-latest) .xp-step-text {
+  display: none;
+}
+.xp-new {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+.xp-latest .xp-new {
+  color: var(--xp-new);
+  background: var(--xp-new-bg);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--xp-new-bg);
+}
+.xp-steps-controls {
+  display: flex;
+  gap: 0.15rem;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 0.45rem;
+}
+.xp-steps-count {
+  margin-right: 0.45rem;
+  font-family: var(--headerFont);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+/* back / forward stay tucked away until the reader reaches for the ring */
+.xp-step-nav {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--darkgray);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.xp-step-nav svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.xp-steps-controls:hover .xp-step-nav,
+.xp-steps-controls:focus-within .xp-step-nav,
+.xp-steps:focus-visible .xp-step-nav {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.xp-step-nav:hover:not(:disabled) {
+  color: var(--xp-accent);
+  background: var(--xp-accent-soft);
+}
+.xp-steps-controls .xp-step-nav:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.xp-ring {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--xp-accent);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.xp-ring:hover {
+  background: var(--xp-accent-soft);
+}
+.xp-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.xp-ring-track,
+.xp-ring-fill {
+  fill: none;
+  stroke-width: 2.4;
+}
+.xp-ring-track {
+  stroke: var(--lightgray);
+}
+.xp-ring-fill {
+  stroke: var(--xp-accent);
+  stroke-linecap: round;
+  animation: xp-ring var(--xp-step-dur, 4s) linear forwards paused;
+}
+.xp-running .xp-ring-fill {
+  animation-play-state: running;
+}
+.xp-done .xp-ring-fill {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+.xp-ring-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(90deg);
+  transform-origin: 16px 16px;
+}
+@keyframes xp-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes xp-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* ------------------------------------------------------------- quiz */
+.xp-quiz {
+  margin: 2.2rem 0;
+  padding: 1rem 1.2rem 1.1rem;
+  border-radius: var(--xp-radius);
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  box-shadow: 0 1px 0 var(--lightgray);
+}
+.xp-q > :first-child {
+  margin-top: 0.3rem;
+}
+.xp-choices {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.xp-choices > li.xp-choice {
+  margin: 0;
+  padding: 0;
+}
+.xp-choices > li::marker {
+  content: none;
+}
+.xp-choice-why {
+  display: none;
+}
+.xp-choice-btn {
+  width: 100%;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  text-align: left;
+  font: inherit;
+  color: var(--darkgray);
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.xp-choice-btn:hover:not(:disabled) {
+  border-color: var(--xp-accent);
+  background: var(--xp-accent-soft);
+}
+.xp-choice-btn:disabled {
+  cursor: default;
+}
+.xp-choice-text > p {
+  margin: 0;
+}
+.xp-letter {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--headerFont);
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--lightgray);
+  color: var(--darkgray);
+}
+.xp-answered .xp-choice:not(.xp-is-correct):not(.xp-is-wrong) .xp-choice-btn {
+  opacity: 0.55;
+}
+.xp-is-correct .xp-choice-btn {
+  border-color: var(--xp-good);
+  background: var(--xp-good-soft);
+}
+.xp-is-correct .xp-letter {
+  background: var(--xp-good);
+  color: var(--light);
+}
+.xp-is-wrong .xp-choice-btn {
+  border-color: var(--xp-bad);
+  background: var(--xp-bad-soft);
+}
+.xp-is-wrong .xp-letter {
+  background: var(--xp-bad);
+  color: var(--light);
+}
+.xp-feedback {
+  margin-top: 0.9rem;
+  animation: xp-in 0.3s ease;
+}
+.xp-feedback-head {
+  font-family: var(--headerFont);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.xp-right .xp-feedback-head {
+  color: var(--xp-good);
+}
+.xp-wrong .xp-feedback-head {
+  color: var(--xp-bad);
+}
+.xp-why-wrong,
+.xp-why-right,
+.xp-right-answer {
+  margin: 0.4rem 0;
+}
+.xp-why-wrong > p,
+.xp-why-right > p {
+  display: inline;
+}
+.xp-right-answer {
+  font-weight: 600;
+  color: var(--xp-good);
+}
+.xp-solution-shown {
+  margin: 0.8rem 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--xp-good);
+  background: var(--xp-good-soft);
+  border-radius: 0 8px 8px 0;
+}
+.xp-solution-title {
+  font-family: var(--headerFont);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--xp-good);
+}
+.xp-solution-body > :last-child {
+  margin-bottom: 0.2rem;
+}
+
+/* ----------------------------------------------------------- graphs */
+.xp-graph {
+  margin: 1.6rem 0;
+}
+.xp-graph-frame {
+  border: 1px solid var(--lightgray);
+  border-radius: var(--xp-radius);
+  padding: 0.6rem 0.6rem 0.5rem;
+  background: var(--light);
+}
+.xp-graph-title {
+  font-family: var(--headerFont);
+  font-weight: 600;
+  padding: 0 0.3rem 0.4rem;
+  color: var(--dark);
+}
+.xp-canvas {
+  display: block;
+  width: 100%;
+}
+.xp-graph-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.5rem 0.3rem 0;
+}
+.xp-graph-controls:empty {
+  display: none;
+}
+.xp-slider {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.xp-slider input {
+  accent-color: var(--xp-accent);
+}
+.xp-slider-name {
+  font-style: italic;
+  font-family: KaTeX_Math, serif;
+}
+.xp-slider-val {
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5em;
+}
+.xp-graph-caption {
+  font-size: 0.85rem;
+  color: var(--gray);
+  padding: 0.4rem 0.3rem 0;
+}
+.xp-graph-error {
+  color: var(--xp-bad);
+  font-family: var(--codeFont);
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-note,
+  .xp-step,
+  .xp-feedback {
+    transition: none;
+    animation: none;
+  }
+}

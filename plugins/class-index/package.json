@@ -1,0 +1,30 @@
+{
+  "name": "class-index",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./components": {
+      "import": "./src/index.js"
+    }
+  },
+  "quartz": {
+    "name": "class-index",
+    "displayName": "Class Index",
+    "description": "Lists every class (top-level folder) on the home page",
+    "version": "1.0.0",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "components": {
+      "ClassIndex": {
+        "displayName": "Class Index",
+        "defaultPosition": "afterBody",
+        "defaultPriority": 5
+      }
+    }
+  }
+}

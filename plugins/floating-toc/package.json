@@ -1,0 +1,30 @@
+{
+  "name": "floating-toc",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./components": {
+      "import": "./src/index.js"
+    }
+  },
+  "quartz": {
+    "name": "floating-toc",
+    "displayName": "Floating Table of Contents",
+    "description": "A collapsed table of contents that floats at the edge of the page",
+    "version": "1.0.0",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "components": {
+      "FloatingToc": {
+        "displayName": "Floating TOC",
+        "defaultPosition": "afterBody",
+        "defaultPriority": 90
+      }
+    }
+  }
+}

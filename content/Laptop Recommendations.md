@@ -2,6 +2,7 @@
 date created: 2026-04-27T10:09:00
 date modified: 2026-04-28T10:39:00
 publish: true
+unlisted: true
 description: "A list of laptops that are all good choices for college use"
 ---
 # Laptop Recommendations
@@ -16,7 +17,7 @@ There are so many different use cases and price points that result in different 
 
 ![macbook neo|500|center](https://files.aamirazad.com/cdn/macbook-neo-or3kgmq.webp)
 
-No, I don’t hate Apple. The MacBook has always been the de facto high quality laptop experience, and just recently, Apple brought this experience to the broader audience with the [**MacBook Neo**](https://www.apple.com/macbook-neo). Apple is amazing at hardware: one aluminum block, killer trackpad, great keyboard, crisp little screen, all for \$600 (or \$500 if you use the student discount which I've heard is very easy to get). If macOS works for you, this is the laptop to get. But there are cons you should know if. Just know the brain inside is a slightly amped up iPhone 16 Pro chip, the RAM is locked at 8 GB forever, and Windows folks need not apply.
+No, I don’t hate Apple. The MacBook has always been the de facto high quality laptop experience, and just recently, Apple brought this experience to the broader audience with the [**MacBook Neo**](https://www.apple.com/macbook-neo). Apple is amazing at hardware: one aluminum block, killer trackpad, great keyboard, crisp little screen, all for \$600 (or \$500 if you use the student discount which I've heard is very easy to get). If macOS works for you, this is the laptop to get. But there are cons you should know of. Just know the brain inside is a slightly amped up iPhone 16 Pro chip, the RAM is locked at 8 GB forever, and Windows folks need not apply.
 
 > [!info]- See applicable YouTube reviews
 > ![](https://youtu.be/iGeXGdYE7UE)
@@ -58,7 +59,7 @@ The [**Lenovo 14" Slim 7i Aura Edition**](https://www.lenovo.com/us/en/p/laptops
 
 ![memory-price-graph](https://files.aamirazad.com/cdn/memory-price-graph.webp)
 
-Anyway, the keyboard is excellent and the OLED display paired with the strong battery life makes this my top choice for students. I recommended this laptop to Joseph, and he bought it and likes it very much. He especially likes its touchscreen display and the pen he got with it. For its price, its one of the absolute standout laptops you can buy.
+Anyway, the keyboard is excellent and the OLED display paired with the strong battery life makes this my top choice for students. I recommended this laptop to Joseph, and he bought it and likes it very much. He especially likes its touchscreen display and the pen he got with it. For its price, it's one of the absolute standout laptops you can buy.
 
 > [!info]- See applicable YouTube reviews
 > ![](https://youtu.be/A-vQNJXKAEU)
@@ -69,7 +70,7 @@ Anyway, the keyboard is excellent and the OLED display paired with the strong ba
 
 ![hp-omnibook](https://files.aamirazad.com/cdn/hp-omnibook.webp)
 
-Another solid option in Windows laptop manufactures is HP. HP is known for their bang-for-the-buck laptops, although they sometimes have trade-offs. The [HP OmniBook X Flip 2-in-1 16](https://www.hp.com/us-en/shop/pdp/hp-omnibook-x-flipngai-16-as0047nr) is a great machine. Make sure to get it on sale (a state in which it is almost always in) for \$900. The CPU has good performance for most tasks while also giving solid battery life. It has a 360° touchscreen display, but the keyboard is not the best on the market. It is also 16" which means it is quite a bit bigger than most of the laptops on this list which is 14". I personally, like the smaller 14" in laptops but that is up to personal preference. If you want a smaller one, they sell the same laptop with a 14" display. The [HP OmniBook X Flip 2-in-1 14"](https://www.hp.com/us-en/shop/pdp/hp-omnibook-x-flip-14-inch-2-in-1-laptop-next-gen-ai-pc-ak4z4av-1) is a good deal at \$1000.
+Another solid option in Windows laptop manufacturers is HP. HP is known for their bang-for-the-buck laptops, although they sometimes have trade-offs. The [HP OmniBook X Flip 2-in-1 16](https://www.hp.com/us-en/shop/pdp/hp-omnibook-x-flipngai-16-as0047nr) is a great machine. Make sure to get it on sale (a state in which it is almost always in) for \$900. The CPU has good performance for most tasks while also giving solid battery life. It has a 360° touchscreen display, but the keyboard is not the best on the market. It is also 16" which means it is quite a bit bigger than most of the laptops on this list which is 14". I personally, like the smaller 14" in laptops but that is up to personal preference. If you want a smaller one, they sell the same laptop with a 14" display. The [HP OmniBook X Flip 2-in-1 14"](https://www.hp.com/us-en/shop/pdp/hp-omnibook-x-flip-14-inch-2-in-1-laptop-next-gen-ai-pc-ak4z4av-1) is a good deal at \$1000.
 
 > [!info]- See applicable YouTube reviews
 > ![](https://youtu.be/_dlvc_RJZdA)

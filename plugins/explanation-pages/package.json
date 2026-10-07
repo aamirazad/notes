@@ -1,0 +1,22 @@
+{
+  "name": "explanation-pages",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
+  "quartz": {
+    "name": "explanation-pages",
+    "displayName": "Explanation Pages",
+    "description": "Dedicated pages for margin explanations",
+    "version": "1.0.0",
+    "category": "pageType",
+    "quartzVersion": ">=5.0.0",
+    "defaultOrder": 60,
+    "defaultEnabled": true
+  }
+}

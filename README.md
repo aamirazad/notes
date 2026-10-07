@@ -1,1 +1,1 @@
-# School Notes 
+# Notes
